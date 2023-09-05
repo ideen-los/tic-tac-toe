@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #222;
+  color: beige;
+  font-family: "Inter", sans-serif;
+}
+
+.gameboard {
+  display: flex;
+  flex-wrap: wrap;
+  width: 600px;
+  height: 600px;
+  cursor: pointer;
+}
+
+.field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 198px;
+  font-weight: 200;
+  width: 33.33%;
+  height: 33.33%;
+  background-color: #303030;
+  border: 1px solid #444;
+}
+
+@media (hover: hover) {
+  .field:hover {
+    background-color: #444;
+  }
+}
