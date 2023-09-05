@@ -1,5 +1,7 @@
-// GAMEBOARD CONTROLS
+/* GAMEBOARD DATA & CONTROLS
+======================================== */
 const gameBoard = (function () {
+  // the board layout
   const layout = [
     { letter: "x", player: "robert", field: "field1" },
     { letter: "o", player: "computer", field: "field2" },
@@ -9,24 +11,26 @@ const gameBoard = (function () {
     { letter: "o", player: "computer", field: "field8" },
   ];
 
+  // read board layout array and populate the DOM elemnts with the data
   const populateFields = () => {
     const fields = document.querySelectorAll(".field");
     let layout = gameBoard.getLayout();
 
+    // loop through DOM elements & layout objects
     for (let field of fields) {
       for (let layoutObj of layout) {
-        if (
-          field.classList.contains(layoutObj.field) &&
-          layoutObj.letter === "x"
-        ) {
-          field.textContent = "x";
-        } else if (
-          field.classList.contains(layoutObj.field) &&
-          layoutObj.letter === "o"
-        ) {
-          field.textContent = "o";
-        } else {
-          continue;
+        // if field class equals a layout objects field
+        if (field.classList.contains(layoutObj.field)) {
+          switch (layoutObj.letter) {
+            case "x":
+              field.textContent = "x";
+              break;
+            case "o":
+              field.textContent = "o";
+              break;
+            default:
+              continue;
+          }
         }
       }
     }
@@ -42,15 +46,20 @@ const gameBoard = (function () {
     layout.splice(0);
   };
 
+  // export functions
   return { getLayout, setLayout, clearLayout, populateFields };
 })();
 
+/* CREATE A NEW LAYOUT OBJECT
+======================================== */
 const createLayoutObject = function (letter, player, field) {
   return { letter, player, field };
 };
 
-// PLAYER INTERACTION
+/* PLAYER INTERACTION 
+======================================== */
 const displayController = (function () {
+  // get the DOM elements
   const fields = document.querySelectorAll(".field");
 
   const getPlayerChoice = () => {
@@ -61,10 +70,13 @@ const displayController = (function () {
   };
 
   const makeMark = (e) => {
-    gameBoard.setLayout(
-      createLayoutObject("x", "robert", e.target.getAttribute("data-field-id"))
-    );
+    // save players choice
+    let playerChoice = e.target.getAttribute("data-field-id");
 
+    // create new layout object with players choice and push it to board layout array
+    gameBoard.setLayout(createLayoutObject("x", "robert", playerChoice));
+
+    // read board layout array and populate the DOM elemnts with the data
     gameBoard.populateFields();
   };
 
