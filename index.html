@@ -13,8 +13,13 @@
     />
   </head>
   <body>
-    <h1>Tic Tac Toe</h1>
     <div id="container">
+      <h1>Tic Tac Toe</h1>
+      <div class="player-container">
+        <div class="player player1"><form class="player1"><input class="input-player" name="player-name" type="text" placeholder="Player1 Name"></input><input class="btn" type="submit" value="Confirm Name"></form></div>
+        <div class="player player2"><form class="player2"><input class="input-player" name="player-name" type="text" placeholder="Player2 Name"></input><input class="btn" type="submit" value="Confirm Name"></form></div>
+      </div>
+      <div class="result">Player 1 wins</div>
       <div class="gameboard">
         <div class="field field1" data-field-id="00"></div>
         <div class="field field2" data-field-id="01"></div>
@@ -28,6 +33,6 @@
       </div>
     </div>
 
-    <script src="js/tictactoe2.js"></script>
+    <script src="js/tictactoe.js"></script>
   </body>
 </html>

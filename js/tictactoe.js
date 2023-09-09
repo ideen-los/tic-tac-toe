@@ -2,7 +2,11 @@
 ======================================== */
 const gameBoard = (function () {
   // the layout of the Tic Tac Toe grid
-  const layout = [];
+  const layout = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ];
 
   // function to read board layout & add "X" or "O" to the elements of the Tic Tac Toe grid
   const populateGameGrid = () => {
@@ -38,35 +42,78 @@ const gameBoard = (function () {
     layout.push(layoutObj);
   };
   const clearLayout = () => {
-    layout.splice(0);
+    layout.splice[0](0, 3, 0, 0, 0);
+    layout.splice[1](0, 3, 0, 0, 0);
+    layout.splice[2](0, 3, 0, 0, 0);
   };
 
   // export functions
   return { getLayout, setLayout, clearLayout, populateGameGrid };
 })();
 
-/* CREATE NEW BOARD LAYOUT OBJECT
+/* PLAYER CREATION
 ======================================== */
-const createLayoutObject = function (letter, player, element, value) {
-  return { letter, player, element, value };
-};
+const playerCreation = (function () {
+  const player1Name = null;
+  const player2Name = null;
+
+  const PlayerNameForms = document.querySelectorAll("form");
+
+  const getPlayerName = () => {
+    console.log("getPlayerName() initialized");
+    for (let form of PlayerNameForms) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log(e.target);
+        let playerName = form.elements["player-name"].value;
+        let playerMark;
+        if (e.target.classList.contains("player1")) {
+          playerMark = "x";
+        } else {
+          playerMark = "o";
+        }
+
+        playerCreation.createNewPlayer(playerMark, playerName, 0);
+      });
+    }
+  };
+
+  const players = [];
+
+  // Create new Player function
+  const createNewPlayer = (mark, name, wins) => {
+    players.push({ mark, name, wins });
+  };
+
+  const getPlayers = () => {
+    return players;
+  };
+  const clearPlayers = () => {
+    players.splice(0);
+  };
+
+  return { getPlayerName, createNewPlayer, getPlayers, clearPlayers };
+})();
 
 /* PLAYER INTERACTION 
 ======================================== */
 const displayController = (function () {
+  // add event listeners to squares
   const getPlayerChoice = () => {
     const gameGrid = document.querySelectorAll(".field");
     gameGrid.forEach((elem) => {
       elem.addEventListener("click", displayController.makeMark);
     });
   };
-
   const removePlayerChoice = () => {
     const gameGrid = document.querySelectorAll(".field");
     gameGrid.forEach((elem) => {
       elem.removeEventListener("click", displayController.makeMark);
+      elem.classList.add("end");
     });
   };
+
+  let iteration = 0;
 
   // function to get the players choice & add X or O to the target DOM element
   const makeMark = (e) => {
@@ -75,30 +122,33 @@ const displayController = (function () {
 
     // get players choice
     let playerChoice = e.target.getAttribute("data-field-id");
+    let index1 = +playerChoice[0];
+    let index2 = +playerChoice[1];
 
-    for (let layoutObj of currentLayout) {
-      if (layoutObj.element === playerChoice) {
-        return;
+    console.log({ playerChoice }, { index1 }, { index2 });
+
+    if (currentLayout[index1][index2] !== 0) {
+      return;
+    } else {
+      if (iteration % 2 === 0) {
+        currentLayout[index1].splice(index2, 1, 1);
+        e.target.textContent = "x";
+        e.target.classList.add("taken");
+      } else {
+        currentLayout[index1].splice(index2, 1, -1);
+        e.target.textContent = "o";
+        e.target.classList.add("taken");
       }
     }
 
-    // create new layout object with players choice and push it to board layout array
-    if (currentLayout.length % 2 === 0) {
-      gameBoard.setLayout(createLayoutObject("x", "player a", playerChoice, 1));
-    } else {
-      gameBoard.setLayout(
-        createLayoutObject("o", "player b", playerChoice, -1)
-      );
-    }
+    console.log(currentLayout);
+    iteration += 1;
 
-    // read board layout array and populate the square DOM elements with either X or O
-    gameBoard.populateGameGrid();
+    calcEndresult.calcPoints();
 
     // stop game after 6 rounds
-    if (currentLayout.length === 6) {
+    if (iteration === 9) {
       displayController.removePlayerChoice();
-      calcEndresult.getAllElements();
-      calcEndresult.addPoints();
     }
   };
 
@@ -109,144 +159,146 @@ const displayController = (function () {
 /* CALCULATE ENDRESULT
 ======================================== */
 const calcEndresult = (function () {
-  // function to get the current board layout and compare it with the Tic Tac Toe grid
-  const getAllElements = () => {
-    // get squares & current board layout
-    const gameGrid = document.querySelectorAll(".field");
-    const endLayout = gameBoard.getLayout();
-    let elementFoundInLayout = false;
+  let winner = null;
+  let iteration = 0;
 
-    // loop trough the cells of the Tic Tac Toe grid
-    for (let elem of gameGrid) {
-      elementFoundInLayout = false;
-      // check if cell is part of the board layout array
-      for (let layoutObj of endLayout) {
-        if (layoutObj.element === elem.getAttribute("data-field-id")) {
-          elementFoundInLayout = true;
-          break;
+  const calcPoints = () => {
+    // array to save the endresult points
+    let endLayout = gameBoard.getLayout();
+
+    let row1 = endLayout[0][0] + endLayout[0][1] + endLayout[0][2];
+    let row2 = endLayout[1][0] + endLayout[1][1] + endLayout[1][2];
+    let row3 = endLayout[2][0] + endLayout[2][1] + endLayout[2][2];
+    let col1 = endLayout[0][0] + endLayout[1][0] + endLayout[2][0];
+    let col2 = endLayout[0][1] + endLayout[1][1] + endLayout[2][1];
+    let col3 = endLayout[0][2] + endLayout[1][2] + endLayout[2][2];
+    let minDiag = endLayout[0][2] + endLayout[1][1] + endLayout[2][0];
+    let maxDiag = endLayout[0][0] + endLayout[1][1] + endLayout[2][2];
+
+    let lineSum = [
+      { row1 },
+      { row2 },
+      { row3 },
+      { col1 },
+      { col2 },
+      { col3 },
+      { minDiag },
+      { maxDiag },
+    ];
+
+    console.log(lineSum);
+
+    for (let winnerLine of lineSum) {
+      for (let key in winnerLine) {
+        if (winnerLine[key] === 3) {
+          console.log("Player X wins!");
+          winner = key;
+          displayController.removePlayerChoice();
+          showEndresult.highlightWinner();
+          return;
+        } else if (winnerLine[key] === -3) {
+          console.log("Player O wins!");
+          winner = key;
+          displayController.removePlayerChoice();
+          showEndresult.highlightWinner();
+          return;
         }
       }
-      // if not, add the respective cell as object to layout array with a value of 0
-      if (elementFoundInLayout === false) {
-        gameBoard.setLayout(
-          createLayoutObject(null, null, elem.getAttribute("data-field-id"), 0)
-        );
-      }
+    }
+
+    iteration += 1;
+
+    if (iteration === 9 && !winner) {
+      console.log("Draw!");
     }
   };
 
-  // array to save the endresult points
-  let points = [];
-
-  // function to calculate the field values to check who won
-  const addPoints = () => {
-    // get board layout
-    const endLayout = gameBoard.getLayout();
-
-    // sum up rows
-    let row1 = 0;
-    let row2 = 0;
-    let row3 = 0;
-
-    for (let layoutObj of endLayout) {
-      if (
-        layoutObj.element === "field1" ||
-        layoutObj.element === "field2" ||
-        layoutObj.element === "field3"
-      ) {
-        row1 += layoutObj.value;
-      } else if (
-        layoutObj.element === "field4" ||
-        layoutObj.element === "field5" ||
-        layoutObj.element === "field6"
-      ) {
-        row2 += layoutObj.value;
-      } else if (
-        layoutObj.element === "field7" ||
-        layoutObj.element === "field8" ||
-        layoutObj.element === "field9"
-      ) {
-        row3 += layoutObj.value;
-      }
-    }
-
-    points.push(row1, row2, row3);
-
-    // sum up columns
-    let col1 = 0;
-    let col2 = 0;
-    let col3 = 0;
-
-    for (let layoutObj of endLayout) {
-      if (
-        layoutObj.element === "field1" ||
-        layoutObj.element === "field4" ||
-        layoutObj.element === "field7"
-      ) {
-        col1 += layoutObj.value;
-      } else if (
-        layoutObj.element === "field2" ||
-        layoutObj.element === "field5" ||
-        layoutObj.element === "field8"
-      ) {
-        col2 += layoutObj.value;
-      } else if (
-        layoutObj.element === "field3" ||
-        layoutObj.element === "field6" ||
-        layoutObj.element === "field9"
-      ) {
-        col3 += layoutObj.value;
-      }
-    }
-
-    points.push(col1, col2, col3);
-
-    // sum up top right to bottom left diagonal
-    let minDiagonal = 0;
-
-    for (let layoutObj of endLayout) {
-      if (
-        layoutObj.element === "field3" ||
-        layoutObj.element === "field5" ||
-        layoutObj.element === "field7"
-      ) {
-        minDiagonal += layoutObj.value;
-      }
-    }
-
-    // sum up top left to bottom right diagonal
-    let maxDiagonal = 0;
-
-    for (let layoutObj of endLayout) {
-      if (
-        layoutObj.element === "field1" ||
-        layoutObj.element === "field5" ||
-        layoutObj.element === "field9"
-      ) {
-        maxDiagonal += layoutObj.value;
-      }
-    }
-
-    points.push(minDiagonal, maxDiagonal);
-
-    console.log(points);
-  };
-
-  const getPoints = () => {
-    return points;
-  };
-  const clearPoints = () => {
-    points.splice(0);
+  const getWinner = () => {
+    return winner;
   };
 
   // export functions
-  return { getAllElements, addPoints, getPoints, clearPoints };
+  return { calcPoints, getWinner };
 })();
 
 /* DISPLAY ENDRESULT
 ======================================== */
-const showEndresult = function () {
-  let points = calcEndresult.getPoints();
-};
+const showEndresult = (function () {
+  const highlightWinner = () => {
+    const gameGrid = document.querySelectorAll(".field");
+    const winningSquares = calcEndresult.getWinner();
+
+    for (let elem of gameGrid) {
+      if (winningSquares === "row1") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "01" ||
+          elem.getAttribute("data-field-id") === "02"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "row2") {
+        if (
+          elem.getAttribute("data-field-id") === "10" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "12"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "row3") {
+        if (
+          elem.getAttribute("data-field-id") === "20" ||
+          elem.getAttribute("data-field-id") === "21" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col1") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "10" ||
+          elem.getAttribute("data-field-id") === "20"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col2") {
+        if (
+          elem.getAttribute("data-field-id") === "01" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "21"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col3") {
+        if (
+          elem.getAttribute("data-field-id") === "02" ||
+          elem.getAttribute("data-field-id") === "12" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "minDiag") {
+        if (
+          elem.getAttribute("data-field-id") === "02" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "20"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "maxDiag") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      }
+    }
+  };
+
+  return { highlightWinner };
+})();
 
 displayController.getPlayerChoice();
+playerCreation.getPlayerName();
