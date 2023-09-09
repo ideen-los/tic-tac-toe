@@ -39,10 +39,37 @@ body {
   height: 33.33%;
   background-color: #303030;
   border: 1px solid #444;
+  user-select: none;
+}
+
+.field.taken {
+  transition: background-color 0.4s ease-out;
+}
+
+.field.winner {
+  background-color: #2d634b;
+}
+
+.field.end {
+  cursor: default;
 }
 
 @media (hover: hover) {
   .field:hover {
     background-color: #444;
+  }
+  .field.end:hover {
+    background-color: #303030;
+  }
+  .field.taken:active {
+    background-color: darkred;
+    transition: none;
+  }
+  .field.end:active {
+    background-color: #303030;
+    transition: none;
+  }
+  .field.winner:hover {
+    background-color: #2d634b;
   }
 }

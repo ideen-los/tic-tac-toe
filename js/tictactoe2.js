@@ -65,6 +65,7 @@ const displayController = (function () {
     const gameGrid = document.querySelectorAll(".field");
     gameGrid.forEach((elem) => {
       elem.removeEventListener("click", displayController.makeMark);
+      elem.classList.add("end");
     });
   };
 
@@ -82,16 +83,18 @@ const displayController = (function () {
 
     console.log({ playerChoice }, { index1 }, { index2 });
 
-    if (currentLayout[index1][index2] === 0) {
+    if (currentLayout[index1][index2] !== 0) {
+      return;
+    } else {
       if (iteration % 2 === 0) {
         currentLayout[index1].splice(index2, 1, 1);
         e.target.textContent = "x";
+        e.target.classList.add("taken");
       } else {
         currentLayout[index1].splice(index2, 1, -1);
         e.target.textContent = "o";
+        e.target.classList.add("taken");
       }
-    } else {
-      return;
     }
 
     console.log(currentLayout);
@@ -112,6 +115,7 @@ const displayController = (function () {
 /* CALCULATE ENDRESULT
 ======================================== */
 const calcEndresult = (function () {
+  let winner = null;
   let iteration = 0;
 
   const calcPoints = () => {
@@ -127,22 +131,34 @@ const calcEndresult = (function () {
     let minDiag = endLayout[0][2] + endLayout[1][1] + endLayout[2][0];
     let maxDiag = endLayout[0][0] + endLayout[1][1] + endLayout[2][2];
 
-    let lineSum = [row1, row2, row3, col1, col2, col3, minDiag, maxDiag];
-    let winner = null;
+    let lineSum = [
+      { row1 },
+      { row2 },
+      { row3 },
+      { col1 },
+      { col2 },
+      { col3 },
+      { minDiag },
+      { maxDiag },
+    ];
 
     console.log(lineSum);
 
-    for (winnerLine of lineSum) {
-      if (winnerLine === 3) {
-        console.log("Player X wins!");
-        winner = "Player X";
-        displayController.removePlayerChoice();
-        break;
-      } else if (winnerLine === -3) {
-        console.log("Player O wins!");
-        winner = "Player O";
-        displayController.removePlayerChoice();
-        break;
+    for (let winnerLine of lineSum) {
+      for (let key in winnerLine) {
+        if (winnerLine[key] === 3) {
+          console.log("Player X wins!");
+          winner = key;
+          displayController.removePlayerChoice();
+          showEndresult.highlightWinner();
+          return;
+        } else if (winnerLine[key] === -3) {
+          console.log("Player O wins!");
+          winner = key;
+          displayController.removePlayerChoice();
+          showEndresult.highlightWinner();
+          return;
+        }
       }
     }
 
@@ -153,14 +169,91 @@ const calcEndresult = (function () {
     }
   };
 
+  const getWinner = () => {
+    return winner;
+  };
+
   // export functions
-  return { calcPoints, getPoints, clearPoints };
+  return { calcPoints, getWinner };
 })();
 
 /* DISPLAY ENDRESULT
 ======================================== */
-const showEndresult = function () {
-  let points = calcEndresult.getPoints();
-};
+const showEndresult = (function () {
+  const highlightWinner = () => {
+    const gameGrid = document.querySelectorAll(".field");
+    const winningSquares = calcEndresult.getWinner();
+
+    for (let elem of gameGrid) {
+      if (winningSquares === "row1") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "01" ||
+          elem.getAttribute("data-field-id") === "02"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "row2") {
+        if (
+          elem.getAttribute("data-field-id") === "10" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "12"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "row3") {
+        if (
+          elem.getAttribute("data-field-id") === "20" ||
+          elem.getAttribute("data-field-id") === "21" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col1") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "10" ||
+          elem.getAttribute("data-field-id") === "20"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col2") {
+        if (
+          elem.getAttribute("data-field-id") === "01" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "21"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "col3") {
+        if (
+          elem.getAttribute("data-field-id") === "02" ||
+          elem.getAttribute("data-field-id") === "12" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "minDiag") {
+        if (
+          elem.getAttribute("data-field-id") === "02" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "20"
+        ) {
+          elem.classList.add("winner");
+        }
+      } else if (winningSquares === "maxDiag") {
+        if (
+          elem.getAttribute("data-field-id") === "00" ||
+          elem.getAttribute("data-field-id") === "11" ||
+          elem.getAttribute("data-field-id") === "22"
+        ) {
+          elem.classList.add("winner");
+        }
+      }
+    }
+  };
+
+  return { highlightWinner };
+})();
 
 displayController.getPlayerChoice();
