@@ -60,29 +60,37 @@ const playerCreation = (function () {
   const PlayerNameForms = document.querySelectorAll("form");
 
   const getPlayerName = () => {
-    console.log("getPlayerName() initialized");
     for (let form of PlayerNameForms) {
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        console.log(e.target);
         let playerName = form.elements["player-name"].value;
-        let playerMark;
+        let playerIndex;
         if (e.target.classList.contains("player1")) {
-          playerMark = "x";
+          playerIndex = 0;
+          if (playerName === "") {
+            playerName = "Player X";
+          }
         } else {
-          playerMark = "o";
+          playerIndex = 1;
+          if (playerName === "") {
+            playerName = "Player O";
+          }
         }
 
-        playerCreation.createNewPlayer(playerMark, playerName, 0);
+        playerCreation.createNewPlayer(playerIndex, playerName);
+        playerCreation.displayPlayer(e.target);
       });
     }
   };
 
-  const players = [];
+  const players = [
+    { mark: "X", name: "Player X", wins: 0 },
+    { mark: "O", name: "Player O", wins: 0 },
+  ];
 
   // Create new Player function
-  const createNewPlayer = (mark, name, wins) => {
-    players.push({ mark, name, wins });
+  const createNewPlayer = (index, name) => {
+    players[index].name = name;
   };
 
   const getPlayers = () => {
@@ -90,9 +98,41 @@ const playerCreation = (function () {
   };
   const clearPlayers = () => {
     players.splice(0);
+    players.push(
+      { mark: "X", name: "Player X", wins: 0 },
+      { mark: "O", name: "Player O", wins: 0 }
+    );
   };
 
-  return { getPlayerName, createNewPlayer, getPlayers, clearPlayers };
+  const displayPlayer = (target) => {
+    const playerForm = document.querySelectorAll("form");
+    const playerDisplay = document.querySelectorAll(".player-display");
+    const playerName = document.querySelectorAll(".name");
+    const playerWins = document.querySelectorAll(".wins");
+    console.log(playerName);
+
+    const players = playerCreation.getPlayers();
+
+    if (target.classList.contains("player1")) {
+      playerForm[0].style.display = "none";
+      playerName[0].textContent = players[0].name;
+      playerWins[0].textContent = players[0].wins;
+      playerDisplay[0].style.display = "block";
+    } else if (target.classList.contains("player2")) {
+      playerForm[1].style.display = "none";
+      playerName[1].textContent = players[1].name;
+      playerWins[1].textContent = players[1].wins;
+      playerDisplay[1].style.display = "block";
+    }
+  };
+
+  return {
+    getPlayerName,
+    createNewPlayer,
+    getPlayers,
+    clearPlayers,
+    displayPlayer,
+  };
 })();
 
 /* PLAYER INTERACTION 
@@ -186,18 +226,18 @@ const calcEndresult = (function () {
       { maxDiag },
     ];
 
-    console.log(lineSum);
+    const resultDisplay = document.querySelector(".result");
 
     for (let winnerLine of lineSum) {
       for (let key in winnerLine) {
         if (winnerLine[key] === 3) {
-          console.log("Player X wins!");
+          resultDisplay.textContent = "Player X wins!";
           winner = key;
           displayController.removePlayerChoice();
           showEndresult.highlightWinner();
           return;
         } else if (winnerLine[key] === -3) {
-          console.log("Player O wins!");
+          resultDisplay.textContent = "Player O wins!";
           winner = key;
           displayController.removePlayerChoice();
           showEndresult.highlightWinner();
@@ -209,7 +249,7 @@ const calcEndresult = (function () {
     iteration += 1;
 
     if (iteration === 9 && !winner) {
-      console.log("Draw!");
+      resultDisplay.textContent = "Draw!";
     }
   };
 
