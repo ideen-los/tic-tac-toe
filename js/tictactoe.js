@@ -8,33 +8,6 @@ const gameBoard = (function () {
     [0, 0, 0],
   ];
 
-  // function to read board layout & add "X" or "O" to the elements of the Tic Tac Toe grid
-  const populateGameGrid = () => {
-    const gameGrid = document.querySelectorAll(".field");
-    let layout = gameBoard.getLayout();
-
-    // loop through elements of the Tic Tac Toe grid & board layout array
-    for (let elem of gameGrid) {
-      for (let layoutObj of layout) {
-        // if any elements data-field-id equals the element property of a board layout object
-        if (elem.getAttribute("data-field-id") === layoutObj.element) {
-          switch (layoutObj.letter) {
-            case "x":
-              // add "X" or
-              elem.textContent = "x";
-              break;
-            case "o":
-              // "O" to the elements textContent
-              elem.textContent = "o";
-              break;
-            default:
-              continue;
-          }
-        }
-      }
-    }
-  };
-
   const getLayout = () => {
     return layout;
   };
@@ -47,56 +20,24 @@ const gameBoard = (function () {
     layout.splice[2](0, 3, 0, 0, 0);
   };
 
-  // export functions
-  return { getLayout, setLayout, clearLayout, populateGameGrid };
+  // Export functions
+  return { getLayout, setLayout, clearLayout };
 })();
 
 /* PLAYER CREATION
 ======================================== */
 const playerCreation = (function () {
-  const player1Name = null;
-  const player2Name = null;
-
-  const PlayerNameForms = document.querySelectorAll("form");
-
-  const getPlayerName = () => {
-    for (let form of PlayerNameForms) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        let playerName = form.elements["player-name"].value;
-        let playerIndex;
-        if (e.target.classList.contains("player1")) {
-          playerIndex = 0;
-          if (playerName === "") {
-            playerName = "Player X";
-          }
-        } else {
-          playerIndex = 1;
-          if (playerName === "") {
-            playerName = "Player O";
-          }
-        }
-
-        playerCreation.createNewPlayer(playerIndex, playerName);
-        playerCreation.displayPlayer(e.target);
-      });
-    }
-  };
-
+  // Create default Players
   const players = [
     { mark: "X", name: "Player X", wins: 0 },
     { mark: "O", name: "Player O", wins: 0 },
   ];
 
-  // Create new Player function
-  const createNewPlayer = (index, name) => {
-    players[index].name = name;
-  };
-
   const getPlayers = () => {
     return players;
   };
-  const clearPlayers = () => {
+
+  const setDefaultPlayers = () => {
     players.splice(0);
     players.push(
       { mark: "X", name: "Player X", wins: 0 },
@@ -104,20 +45,86 @@ const playerCreation = (function () {
     );
   };
 
-  const displayPlayer = (target) => {
+  // Function to get the names of both players
+  const getPlayerName = () => {
+    // Get the forms that handle the player name input
+    const PlayerNameInput = document.querySelectorAll("form");
+
+    let player1ButtonPressed = false;
+    let player2ButtonPressed = false;
+
+    // Add submit event listener to the forms
+    for (let form of PlayerNameInput) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        // Get the value of the name input
+        let playerName = form.elements["player-name"].value;
+        // Sets the index of the player object in the players array to retrieve
+        let playerIndex = 0;
+
+        if (e.target.classList.contains("player1")) {
+          player1ButtonPressed = true;
+          // If no value has been given use default name
+          if (playerName === "") {
+            playerName = "Player X";
+          }
+        } else {
+          player2ButtonPressed = true;
+          playerIndex = 1;
+          // If no value has been given use default name
+          if (playerName === "") {
+            playerName = "Player O";
+          }
+        }
+
+        setPlayerName(playerIndex, playerName);
+        showPlayerDetails.updatePlayerDisplay(e.target);
+
+        // If players have confirmed their names (either default or custom) activate the gameboard
+        if (player1ButtonPressed === true && player2ButtonPressed === true) {
+          playerInteraction.activateGameBoard();
+        }
+      });
+    }
+  };
+
+  // Set the players name
+  const setPlayerName = (index, name) => {
+    players[index].name = name;
+  };
+
+  // Export functions
+  return {
+    getPlayers,
+    setDefaultPlayers,
+    getPlayerName,
+    setPlayerName,
+  };
+})();
+
+/* PLAYER STATS DISPLAY
+======================================== */
+const showPlayerDetails = (function () {
+  // Display the player names above the gameboard
+  // receives submit event from function getPlayerName()
+  const updatePlayerDisplay = (target) => {
+    // Get the DOM elements
     const playerForm = document.querySelectorAll("form");
     const playerDisplay = document.querySelectorAll(".player-display");
     const playerName = document.querySelectorAll(".name");
     const playerWins = document.querySelectorAll(".wins");
-    console.log(playerName);
 
+    // Get the Player objects
     const players = playerCreation.getPlayers();
 
+    // Player1 name form submitted?
     if (target.classList.contains("player1")) {
       playerForm[0].style.display = "none";
       playerName[0].textContent = players[0].name;
       playerWins[0].textContent = players[0].wins;
       playerDisplay[0].style.display = "block";
+      // Player2 name form submitted?
     } else if (target.classList.contains("player2")) {
       playerForm[1].style.display = "none";
       playerName[1].textContent = players[1].name;
@@ -126,130 +133,147 @@ const playerCreation = (function () {
     }
   };
 
-  return {
-    getPlayerName,
-    createNewPlayer,
-    getPlayers,
-    clearPlayers,
-    displayPlayer,
-  };
+  return { updatePlayerDisplay };
 })();
 
 /* PLAYER INTERACTION 
 ======================================== */
-const displayController = (function () {
-  // add event listeners to squares
-  const getPlayerChoice = () => {
+const playerInteraction = (function () {
+  // Function to add click event listeners to the squares
+  const activateGameBoard = () => {
+    const gameboard = document.querySelector(".gameboard");
+    const result = document.querySelector(".result");
     const gameGrid = document.querySelectorAll(".field");
+
+    /* result.textContent = `Round ${round}`; */
+    gameboard.style.pointerEvents = "all";
+
+    // Assign event listeners to the squares
     gameGrid.forEach((elem) => {
-      elem.addEventListener("click", displayController.makeMark);
+      elem.addEventListener("click", executePlayerChoice);
     });
   };
-  const removePlayerChoice = () => {
+
+  // Function to remove event listeners from the squares
+  const deactivateGameBoard = () => {
     const gameGrid = document.querySelectorAll(".field");
     gameGrid.forEach((elem) => {
-      elem.removeEventListener("click", displayController.makeMark);
+      elem.removeEventListener("click", executePlayerChoice);
       elem.classList.add("end");
     });
   };
 
-  let iteration = 0;
+  // Function to get the square the player clicked on
+  // receives click event from activateGameBoard()
+  const getPlayerChoice = (e) => {
+    let target = e.target;
 
-  // function to get the players choice & add X or O to the target DOM element
-  const makeMark = (e) => {
-    // get current layout
-    currentLayout = gameBoard.getLayout();
+    // Get the players choice
+    let playerChoice = target.getAttribute("data-field-id"); // position of square in 2d space (e.g. "00", "01", "02", "10", ...)
 
-    // get players choice
-    let playerChoice = e.target.getAttribute("data-field-id");
+    // Split data-field-id into coordinates for the layout array
     let index1 = +playerChoice[0];
     let index2 = +playerChoice[1];
 
-    console.log({ playerChoice }, { index1 }, { index2 });
+    return { index1, index2, target };
+  };
 
+  // Function to add "X" or "O" to the squares
+  // receives click event from activateGameBoard()
+  let takenSquares = 0;
+
+  const executePlayerChoice = (e) => {
+    // Get current gameboard layout
+    currentLayout = gameBoard.getLayout();
+
+    // Get players choice
+    let { index1, index2, target } = getPlayerChoice(e);
+
+    // Has the square already been taken?
     if (currentLayout[index1][index2] !== 0) {
       return;
     } else {
-      if (iteration % 2 === 0) {
+      // If not add value 1 or -1 to the layout array and...
+      if (takenSquares % 2 === 0) {
         currentLayout[index1].splice(index2, 1, 1);
-        e.target.textContent = "x";
-        e.target.classList.add("taken");
+        // set content of the clicked square to "X"...
+        target.textContent = "x";
+        target.classList.add("taken");
       } else {
         currentLayout[index1].splice(index2, 1, -1);
-        e.target.textContent = "o";
-        e.target.classList.add("taken");
+        // or "O"
+        target.textContent = "o";
+        target.classList.add("taken");
       }
     }
 
-    console.log(currentLayout);
-    iteration += 1;
+    takenSquares += 1;
 
-    calcEndresult.calcPoints();
+    // Check if there is already a winner...
+    calculateResult.calcPoints();
 
-    // stop game after 6 rounds
-    if (iteration === 9) {
-      displayController.removePlayerChoice();
+    // or stop the game when all squares are taken
+    if (takenSquares === 9) {
+      deactivateGameBoard();
     }
   };
 
-  // export functions
-  return { getPlayerChoice, removePlayerChoice, makeMark };
+  // Export functions
+  return {
+    activateGameBoard,
+    deactivateGameBoard,
+    getPlayerChoice,
+    executePlayerChoice,
+  };
 })();
 
-/* CALCULATE ENDRESULT
+/* CALCULATE THE RESULT OF A PLAYER MOVE
 ======================================== */
-const calcEndresult = (function () {
+const calculateResult = (function () {
+  // Function to sum up rows, columns and diagonals
+  const getLineSum = () => {
+    let currentLayout = gameBoard.getLayout();
+
+    // Calculate and assign line sums
+    let lineSum = {
+      row1: currentLayout[0][0] + currentLayout[0][1] + currentLayout[0][2],
+      row2: currentLayout[1][0] + currentLayout[1][1] + currentLayout[1][2],
+      row3: currentLayout[2][0] + currentLayout[2][1] + currentLayout[2][2],
+      col1: currentLayout[0][0] + currentLayout[1][0] + currentLayout[2][0],
+      col2: currentLayout[0][1] + currentLayout[1][1] + currentLayout[2][1],
+      col3: currentLayout[0][2] + currentLayout[1][2] + currentLayout[2][2],
+      minDiag: currentLayout[0][2] + currentLayout[1][1] + currentLayout[2][0],
+      maxDiag: currentLayout[0][0] + currentLayout[1][1] + currentLayout[2][2],
+    };
+
+    return lineSum;
+  };
+
+  // Function to calculate a winner (3 in a line) or a draw
   let winner = null;
   let iteration = 0;
 
   const calcPoints = () => {
-    // array to save the endresult points
-    let endLayout = gameBoard.getLayout();
+    let lineSum = getLineSum();
+    let result = "";
 
-    let row1 = endLayout[0][0] + endLayout[0][1] + endLayout[0][2];
-    let row2 = endLayout[1][0] + endLayout[1][1] + endLayout[1][2];
-    let row3 = endLayout[2][0] + endLayout[2][1] + endLayout[2][2];
-    let col1 = endLayout[0][0] + endLayout[1][0] + endLayout[2][0];
-    let col2 = endLayout[0][1] + endLayout[1][1] + endLayout[2][1];
-    let col3 = endLayout[0][2] + endLayout[1][2] + endLayout[2][2];
-    let minDiag = endLayout[0][2] + endLayout[1][1] + endLayout[2][0];
-    let maxDiag = endLayout[0][0] + endLayout[1][1] + endLayout[2][2];
-
-    let lineSum = [
-      { row1 },
-      { row2 },
-      { row3 },
-      { col1 },
-      { col2 },
-      { col3 },
-      { minDiag },
-      { maxDiag },
-    ];
-
-    const resultDisplay = document.querySelector(".result");
-
-    for (let winnerLine of lineSum) {
-      for (let key in winnerLine) {
-        if (winnerLine[key] === 3) {
-          resultDisplay.textContent = "Player X wins!";
-          winner = key;
-          displayController.removePlayerChoice();
-          showEndresult.highlightWinner();
-          return;
-        } else if (winnerLine[key] === -3) {
-          resultDisplay.textContent = "Player O wins!";
-          winner = key;
-          displayController.removePlayerChoice();
-          showEndresult.highlightWinner();
-          return;
-        }
+    for (let winnerLine in lineSum) {
+      if (lineSum[winnerLine] === 3) {
+        winner = winnerLine;
+        result = "X";
+        showEndresult.updateResultDisplay(result);
+      } else if (lineSum[winnerLine] === -3) {
+        winner = winnerLine;
+        result = "O";
+        showEndresult.updateResultDisplay(result);
       }
     }
 
     iteration += 1;
 
     if (iteration === 9 && !winner) {
-      resultDisplay.textContent = "Draw!";
+      result = "Draw";
+      showEndresult.updateResultDisplay(result);
     }
   };
 
@@ -257,17 +281,37 @@ const calcEndresult = (function () {
     return winner;
   };
 
-  // export functions
-  return { calcPoints, getWinner };
+  // Export functions
+  return { getLineSum, calcPoints, getWinner };
 })();
 
-/* DISPLAY ENDRESULT
+/* SHOW ENDRESULT
 ======================================== */
 const showEndresult = (function () {
-  const highlightWinner = () => {
-    const gameGrid = document.querySelectorAll(".field");
-    const winningSquares = calcEndresult.getWinner();
+  const updateResultDisplay = (result) => {
+    const resultDisplay = document.querySelector(".result");
 
+    // Who won? "X", "O" or was it a Draw?
+    if (result === "X") {
+      resultDisplay.textContent = "Player X wins!";
+      resultDisplay.style.display = "flex";
+      playerInteraction.deactivateGameBoard();
+      showEndresult.highlightWinningLine();
+    } else if (result === "O") {
+      playerInteraction.deactivateGameBoard();
+      showEndresult.highlightWinningLine();
+      resultDisplay.textContent = "Player O wins!";
+      resultDisplay.style.display = "flex";
+    } else if (result === "Draw") {
+      resultDisplay.textContent = "Draw!";
+    }
+  };
+
+  const highlightWinningLine = () => {
+    const gameGrid = document.querySelectorAll(".field");
+    const winningSquares = calculateResult.getWinner();
+
+    // Loop through the squares and highlight the ones that contributed to the players win
     for (let elem of gameGrid) {
       if (winningSquares === "row1") {
         if (
@@ -337,8 +381,7 @@ const showEndresult = (function () {
     }
   };
 
-  return { highlightWinner };
+  return { updateResultDisplay, highlightWinningLine };
 })();
 
-displayController.getPlayerChoice();
 playerCreation.getPlayerName();
