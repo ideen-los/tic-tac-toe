@@ -23,11 +23,12 @@
               name="player-name"
               type="text"
               placeholder='Player "X"'
+              autocomplete="off"
             /><input class="btn" type="submit" value="Confirm" />
           </form>
           <div class="player-display player-display-player1">
             <div class="name-display">
-              Name: <span class="name">Robert</span>
+              <span class="name">Robert</span>
             </div>
             <div class="mark-display">Mark: <span class="mark">"X"</span></div>
             <div class="wins-display">Wins: <span class="wins">0</span></div>
@@ -40,21 +41,23 @@
               name="player-name"
               type="text"
               placeholder='Player "O"'
+              autocomplete="off"
             /><input class="btn" type="submit" value="Confirm" />
           </form>
           <div class="player-display player-display-player2">
             <div class="name-display">
-              Name: <span class="name">Daniel</span>
+              <span class="name">Daniel</span>
             </div>
             <div class="mark-display">Mark: <span class="mark">"O"</span></div>
             <div class="wins-display">Wins: <span class="wins">0</span></div>
           </div>
         </div>
       </div>
-      <div class="result">
-        Choose your name <span>(or just hit Confirm)</span>
-      </div>
+      <div class="result"></div>
       <div class="gameboard">
+        <div class="controls">
+          Choose your name <span>(or just hit Confirm)</span>
+        </div>
         <div class="field field1" data-field-id="00"></div>
         <div class="field field2" data-field-id="01"></div>
         <div class="field field3" data-field-id="02"></div>

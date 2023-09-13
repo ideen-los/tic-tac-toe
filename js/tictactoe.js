@@ -1,6 +1,8 @@
 /* GAMEBOARD LAYOUT
 ======================================== */
 const gameBoard = (function () {
+  let round = 0;
+
   // the layout of the Tic Tac Toe grid
   const layout = [
     [0, 0, 0],
@@ -15,18 +17,80 @@ const gameBoard = (function () {
     layout.push(layoutObj);
   };
   const clearLayout = () => {
-    layout.splice[0](0, 3, 0, 0, 0);
-    layout.splice[1](0, 3, 0, 0, 0);
-    layout.splice[2](0, 3, 0, 0, 0);
+    layout[0].splice(0, 3, 0, 0, 0);
+    layout[1].splice(0, 3, 0, 0, 0);
+    layout[2].splice(0, 3, 0, 0, 0);
+  };
+
+  setRound = () => {
+    round += 1;
+  };
+
+  getRound = () => {
+    return round;
+  };
+
+  resetRound = () => {
+    round = 1;
+  };
+
+  const gameboard = document.querySelector(".gameboard");
+  const controls = document.querySelector(".controls");
+
+  // Function to add click event listeners to the squares
+  const activateGameBoard = () => {
+    const result = document.querySelector(".result");
+    const gameGrid = document.querySelectorAll(".field");
+    setRound();
+    let round = getRound();
+
+    result.textContent = `Round ${round} - Fight!`;
+    gameboard.style.pointerEvents = "all";
+    controls.style.opacity = "0";
+    controls.style.pointerEvents = "none";
+
+    // Assign event listeners to the squares
+    gameGrid.forEach((elem) => {
+      if (elem.classList.contains("winner")) {
+        elem.classList.remove("winner");
+      } else if (elem.classList.contains("taken")) {
+        elem.classList.remove("taken");
+      }
+      elem.textContent = "";
+      elem.addEventListener("click", playerInteraction.executePlayerChoice);
+    });
+  };
+
+  // Function to remove event listeners from the squares
+  const deactivateGameBoard = () => {
+    const gameGrid = document.querySelectorAll(".field");
+
+    gameboard.style.pointerEvents = "none";
+    controls.style.opacity = "1";
+    controls.style.pointerEvents = "all";
+
+    // Remove event listeners from the squares
+    gameGrid.forEach((elem) => {
+      elem.removeEventListener("click", playerInteraction.executePlayerChoice);
+      elem.classList.add("end");
+    });
+
+    playerManagement.setCurrentPlayer();
   };
 
   // Export functions
-  return { getLayout, setLayout, clearLayout };
+  return {
+    getLayout,
+    setLayout,
+    clearLayout,
+    activateGameBoard,
+    deactivateGameBoard,
+  };
 })();
 
-/* PLAYER CREATION
+/* PLAYER MANAGEMENT
 ======================================== */
-const playerCreation = (function () {
+const playerManagement = (function () {
   // Create default Players
   const players = [
     { mark: "X", name: "Player X", wins: 0 },
@@ -43,6 +107,25 @@ const playerCreation = (function () {
       { mark: "X", name: "Player X", wins: 0 },
       { mark: "O", name: "Player O", wins: 0 }
     );
+  };
+
+  let currentPlayer = true;
+
+  const currentPlayerIsX = () => {
+    return currentPlayer;
+  };
+
+  const setCurrentPlayer = () => {
+    currentPlayer = !currentPlayer;
+  };
+
+  // Function to set the wins property of Player "X" or "O"
+  const setPlayerWins = (playerMark) => {
+    if (playerMark === "x") {
+      players[0].wins += 1;
+    } else if (playerMark === "o") {
+      players[1].wins += 1;
+    }
   };
 
   // Function to get the names of both players
@@ -82,8 +165,8 @@ const playerCreation = (function () {
         showPlayerDetails.updatePlayerDisplay(e.target);
 
         // If players have confirmed their names (either default or custom) activate the gameboard
-        if (player1ButtonPressed === true && player2ButtonPressed === true) {
-          playerInteraction.activateGameBoard();
+        if (player1ButtonPressed && player2ButtonPressed) {
+          gameBoard.activateGameBoard();
         }
       });
     }
@@ -98,6 +181,9 @@ const playerCreation = (function () {
   return {
     getPlayers,
     setDefaultPlayers,
+    currentPlayerIsX,
+    setCurrentPlayer,
+    setPlayerWins,
     getPlayerName,
     setPlayerName,
   };
@@ -106,6 +192,10 @@ const playerCreation = (function () {
 /* PLAYER STATS DISPLAY
 ======================================== */
 const showPlayerDetails = (function () {
+  // Get the Player objects
+  const players = playerManagement.getPlayers();
+  const playerWins = document.querySelectorAll(".wins");
+
   // Display the player names above the gameboard
   // receives submit event from function getPlayerName()
   const updatePlayerDisplay = (target) => {
@@ -113,64 +203,51 @@ const showPlayerDetails = (function () {
     const playerForm = document.querySelectorAll("form");
     const playerDisplay = document.querySelectorAll(".player-display");
     const playerName = document.querySelectorAll(".name");
-    const playerWins = document.querySelectorAll(".wins");
-
-    // Get the Player objects
-    const players = playerCreation.getPlayers();
 
     // Player1 name form submitted?
     if (target.classList.contains("player1")) {
       playerForm[0].style.display = "none";
       playerName[0].textContent = players[0].name;
       playerWins[0].textContent = players[0].wins;
-      playerDisplay[0].style.display = "block";
+      playerDisplay[0].style.display = "flex";
       // Player2 name form submitted?
     } else if (target.classList.contains("player2")) {
       playerForm[1].style.display = "none";
       playerName[1].textContent = players[1].name;
       playerWins[1].textContent = players[1].wins;
-      playerDisplay[1].style.display = "block";
+      playerDisplay[1].style.display = "flex";
     }
   };
 
-  return { updatePlayerDisplay };
+  const updatePlayerStats = () => {
+    playerWins[0].textContent = players[0].wins;
+    playerWins[1].textContent = players[1].wins;
+  };
+
+  return { updatePlayerDisplay, updatePlayerStats };
 })();
 
 /* PLAYER INTERACTION 
 ======================================== */
 const playerInteraction = (function () {
-  // Function to add click event listeners to the squares
-  const activateGameBoard = () => {
-    const gameboard = document.querySelector(".gameboard");
-    const result = document.querySelector(".result");
-    const gameGrid = document.querySelectorAll(".field");
-
-    /* result.textContent = `Round ${round}`; */
-    gameboard.style.pointerEvents = "all";
-
-    // Assign event listeners to the squares
-    gameGrid.forEach((elem) => {
-      elem.addEventListener("click", executePlayerChoice);
-    });
-  };
-
-  // Function to remove event listeners from the squares
-  const deactivateGameBoard = () => {
-    const gameGrid = document.querySelectorAll(".field");
-    gameGrid.forEach((elem) => {
-      elem.removeEventListener("click", executePlayerChoice);
-      elem.classList.add("end");
-    });
+  // Function to display a button that starts the next round
+  const activateNextRound = () => {
+    const controls = document.querySelector(".controls");
+    const nextRoundButton = document.createElement("div");
+    nextRoundButton.classList.add("btn");
+    nextRoundButton.classList.add("btn-next-round");
+    nextRoundButton.textContent = "Next Round";
+    nextRoundButton.addEventListener("click", gameBoard.activateGameBoard);
+    controls.innerHTML = "";
+    controls.appendChild(nextRoundButton);
   };
 
   // Function to get the square the player clicked on
   // receives click event from activateGameBoard()
   const getPlayerChoice = (e) => {
     let target = e.target;
-
     // Get the players choice
     let playerChoice = target.getAttribute("data-field-id"); // position of square in 2d space (e.g. "00", "01", "02", "10", ...)
-
     // Split data-field-id into coordinates for the layout array
     let index1 = +playerChoice[0];
     let index2 = +playerChoice[1];
@@ -183,25 +260,23 @@ const playerInteraction = (function () {
   let takenSquares = 0;
 
   const executePlayerChoice = (e) => {
-    // Get current gameboard layout
-    currentLayout = gameBoard.getLayout();
-
-    // Get players choice
-    let { index1, index2, target } = getPlayerChoice(e);
-
+    currentLayout = gameBoard.getLayout(); // get current gameboard layout
+    let { index1, index2, target } = getPlayerChoice(e); // Get players choice
     // Has the square already been taken?
     if (currentLayout[index1][index2] !== 0) {
       return;
     } else {
-      // If not add value 1 or -1 to the layout array and...
-      if (takenSquares % 2 === 0) {
+      // If not add value 1 or -1 to the layout array...
+      if (playerManagement.currentPlayerIsX() === true) {
+        playerManagement.setCurrentPlayer();
         currentLayout[index1].splice(index2, 1, 1);
-        // set content of the clicked square to "X"...
+        // and set content of the clicked square to "X"...
         target.textContent = "x";
         target.classList.add("taken");
       } else {
+        playerManagement.setCurrentPlayer();
         currentLayout[index1].splice(index2, 1, -1);
-        // or "O"
+        // or to "O"
         target.textContent = "o";
         target.classList.add("taken");
       }
@@ -211,17 +286,15 @@ const playerInteraction = (function () {
 
     // Check if there is already a winner...
     calculateResult.calcPoints();
-
     // or stop the game when all squares are taken
     if (takenSquares === 9) {
-      deactivateGameBoard();
+      calculateResult.calcPoints();
     }
   };
 
   // Export functions
   return {
-    activateGameBoard,
-    deactivateGameBoard,
+    activateNextRound,
     getPlayerChoice,
     executePlayerChoice,
   };
@@ -261,10 +334,12 @@ const calculateResult = (function () {
       if (lineSum[winnerLine] === 3) {
         winner = winnerLine;
         result = "X";
+        playerManagement.setPlayerWins("x");
         showEndresult.updateResultDisplay(result);
       } else if (lineSum[winnerLine] === -3) {
         winner = winnerLine;
         result = "O";
+        playerManagement.setPlayerWins("o");
         showEndresult.updateResultDisplay(result);
       }
     }
@@ -290,20 +365,33 @@ const calculateResult = (function () {
 const showEndresult = (function () {
   const updateResultDisplay = (result) => {
     const resultDisplay = document.querySelector(".result");
+    let players = playerManagement.getPlayers();
 
     // Who won? "X", "O" or was it a Draw?
     if (result === "X") {
-      resultDisplay.textContent = "Player X wins!";
+      showPlayerDetails.updatePlayerStats();
+      resultDisplay.textContent =
+        "Congratulation: " + players[0].name + " wins!";
       resultDisplay.style.display = "flex";
-      playerInteraction.deactivateGameBoard();
+      gameBoard.deactivateGameBoard();
       showEndresult.highlightWinningLine();
+      playerInteraction.activateNextRound();
+      gameBoard.clearLayout();
     } else if (result === "O") {
-      playerInteraction.deactivateGameBoard();
+      showPlayerDetails.updatePlayerStats();
+      gameBoard.deactivateGameBoard();
       showEndresult.highlightWinningLine();
-      resultDisplay.textContent = "Player O wins!";
+      playerInteraction.activateNextRound();
+      gameBoard.clearLayout();
+      resultDisplay.textContent =
+        "Congratulation: " + players[1].name + " wins!";
       resultDisplay.style.display = "flex";
     } else if (result === "Draw") {
       resultDisplay.textContent = "Draw!";
+      gameBoard.deactivateGameBoard();
+      showEndresult.highlightWinningLine();
+      playerInteraction.activateNextRound();
+      gameBoard.clearLayout();
     }
   };
 
@@ -384,4 +472,4 @@ const showEndresult = (function () {
   return { updateResultDisplay, highlightWinningLine };
 })();
 
-playerCreation.getPlayerName();
+playerManagement.getPlayerName();

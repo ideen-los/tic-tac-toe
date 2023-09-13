@@ -33,6 +33,23 @@ h1 {
 .player-container {
   display: flex;
   justify-content: space-between;
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+.player-display {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-display-player2 {
+  align-items: end;
+}
+
+.name-display {
+  font-size: 38px;
+  font-weight: 400;
+  color: #c2529b;
 }
 
 form {
@@ -74,10 +91,17 @@ input:-webkit-autofill:focus {
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 1px;
-  background-color: #c2529b;
-  color: #eee;
+  background-color: #eee;
+  color: #222;
   border: 0;
   cursor: pointer;
+}
+
+.btn-next-round {
+  padding: 28px 42px;
+  font-size: 23px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
 .btn:hover {
@@ -104,11 +128,6 @@ input:-webkit-autofill:focus {
   height: 80px;
   text-align: center;
   font-size: 22px;
-  cursor: default;
-}
-
-.result span {
-  font-weight: 200;
 }
 
 .gameboard {
@@ -118,7 +137,28 @@ input:-webkit-autofill:focus {
   width: 600px;
   height: 550px;
   cursor: pointer;
-  pointer-events: none;
+}
+
+.controls {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 47px;
+  font-weight: 500;
+  line-height: 1.3;
+  background-color: rgba(0, 0, 0, 0.4);
+  cursor: default;
+  transition: opacity 0.3s ease-out;
+}
+
+.controls span {
+  font-size: 40px;
+  font-weight: 200;
+  margin-left: 6px;
 }
 
 .field {
@@ -141,10 +181,6 @@ input:-webkit-autofill:focus {
 
 .field.winner {
   background-color: #2d634b;
-}
-
-.field.end {
-  cursor: default;
 }
 
 @media (hover: hover) {
