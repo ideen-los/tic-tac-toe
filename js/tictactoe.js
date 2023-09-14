@@ -49,13 +49,13 @@ const gameBoard = (function () {
     controls.style.opacity = "0";
     controls.style.pointerEvents = "none";
 
-    // Assign event listeners to the squares
+    // Remove classes from the squares
     gameGrid.forEach((elem) => {
-      if (elem.classList.contains("winner")) {
-        elem.classList.remove("winner");
-      } else if (elem.classList.contains("taken")) {
-        elem.classList.remove("taken");
-      }
+      ["winner", "taken", "end"].forEach((cls) => {
+        if (elem.classList.contains(cls)) {
+          elem.classList.remove(cls);
+        }
+      });
       elem.textContent = "";
       elem.addEventListener("click", playerInteraction.executePlayerChoice);
     });
@@ -66,8 +66,6 @@ const gameBoard = (function () {
     const gameGrid = document.querySelectorAll(".field");
 
     gameboard.style.pointerEvents = "none";
-    controls.style.opacity = "1";
-    controls.style.pointerEvents = "all";
 
     // Remove event listeners from the squares
     gameGrid.forEach((elem) => {
@@ -238,6 +236,8 @@ const playerInteraction = (function () {
     nextRoundButton.classList.add("btn-next-round");
     nextRoundButton.textContent = "Next Round";
     nextRoundButton.addEventListener("click", gameBoard.activateGameBoard);
+    controls.style.opacity = "1";
+    controls.style.pointerEvents = "all";
     controls.innerHTML = "";
     controls.appendChild(nextRoundButton);
   };
@@ -371,23 +371,24 @@ const showEndresult = (function () {
     if (result === "X") {
       showPlayerDetails.updatePlayerStats();
       resultDisplay.textContent =
-        "Congratulation: " + players[0].name + " wins!";
+        "Congratulations: " + players[0].name + " wins!";
       resultDisplay.style.display = "flex";
       gameBoard.deactivateGameBoard();
       showEndresult.highlightWinningLine();
-      playerInteraction.activateNextRound();
+      setTimeout(playerInteraction.activateNextRound, 1200);
       gameBoard.clearLayout();
     } else if (result === "O") {
       showPlayerDetails.updatePlayerStats();
       gameBoard.deactivateGameBoard();
       showEndresult.highlightWinningLine();
-      playerInteraction.activateNextRound();
+      setTimeout(playerInteraction.activateNextRound, 1200);
       gameBoard.clearLayout();
       resultDisplay.textContent =
-        "Congratulation: " + players[1].name + " wins!";
+        "Congratulations: " + players[1].name + " wins!";
       resultDisplay.style.display = "flex";
     } else if (result === "Draw") {
       resultDisplay.textContent = "Draw!";
+      setTimeout(playerInteraction.activateNextRound, 1200);
       gameBoard.deactivateGameBoard();
       showEndresult.highlightWinningLine();
       playerInteraction.activateNextRound();

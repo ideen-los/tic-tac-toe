@@ -11,6 +11,10 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Prompt:wght@600&family=Tilt+Neon&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
   </head>
   <body>
     <div id="container">
@@ -24,14 +28,23 @@
               type="text"
               placeholder='Player "X"'
               autocomplete="off"
-            /><input class="btn" type="submit" value="Confirm" />
+            /><button class="btn" type="submit">
+              <span class="material-symbols-outlined"> check </span>
+              Confirm
+            </button>
           </form>
           <div class="player-display player-display-player1">
             <div class="name-display">
               <span class="name">Robert</span>
             </div>
-            <div class="mark-display">Mark: <span class="mark">"X"</span></div>
-            <div class="wins-display">Wins: <span class="wins">0</span></div>
+            <div class="mark-display">
+              <span class="material-symbols-outlined"> person </span>
+              <span class="mark">X</span>
+            </div>
+            <div class="wins-display">
+              <span class="material-symbols-outlined"> military_tech </span>
+              <span class="wins">0</span>
+            </div>
           </div>
         </div>
         <div class="player">
@@ -42,14 +55,23 @@
               type="text"
               placeholder='Player "O"'
               autocomplete="off"
-            /><input class="btn" type="submit" value="Confirm" />
+            /><button class="btn" type="submit">
+              <span class="material-symbols-outlined"> check </span>
+              Confirm
+            </button>
           </form>
           <div class="player-display player-display-player2">
             <div class="name-display">
               <span class="name">Daniel</span>
             </div>
-            <div class="mark-display">Mark: <span class="mark">"O"</span></div>
-            <div class="wins-display">Wins: <span class="wins">0</span></div>
+            <div class="mark-display">
+              <span class="mark">O</span>
+              <span class="material-symbols-outlined"> person </span>
+            </div>
+            <div class="wins-display">
+              <span class="wins">0</span>
+              <span class="material-symbols-outlined"> military_tech </span>
+            </div>
           </div>
         </div>
       </div>
