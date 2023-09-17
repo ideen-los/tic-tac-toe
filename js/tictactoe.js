@@ -126,6 +126,16 @@ const playerManagement = (function () {
     }
   };
 
+  // Function to start the game with default player names
+  const startGamewithDefaultNames = () => {
+    const startGameButton = document.querySelector(".btn-start-game");
+
+    startGameButton.addEventListener("click", () => {
+      showPlayerDetails.updatePlayerDisplay(startGameButton);
+      gameBoard.activateGameBoard();
+    });
+  };
+
   // Function to get the names of both players
   const getPlayerName = () => {
     // Get the forms that handle the player name input
@@ -182,6 +192,7 @@ const playerManagement = (function () {
     currentPlayerIsX,
     setCurrentPlayer,
     setPlayerWins,
+    startGamewithDefaultNames,
     getPlayerName,
     setPlayerName,
   };
@@ -210,6 +221,15 @@ const showPlayerDetails = (function () {
       playerDisplay[0].style.display = "flex";
       // Player2 name form submitted?
     } else if (target.classList.contains("player2")) {
+      playerForm[1].style.display = "none";
+      playerName[1].textContent = players[1].name;
+      playerWins[1].textContent = players[1].wins;
+      playerDisplay[1].style.display = "flex";
+    } else {
+      playerForm[0].style.display = "none";
+      playerName[0].textContent = players[0].name;
+      playerWins[0].textContent = players[0].wins;
+      playerDisplay[0].style.display = "flex";
       playerForm[1].style.display = "none";
       playerName[1].textContent = players[1].name;
       playerWins[1].textContent = players[1].wins;
@@ -257,38 +277,48 @@ const playerInteraction = (function () {
 
   // Function to add "X" or "O" to the squares
   // receives click event from activateGameBoard()
-  let takenSquares = 0;
-
   const executePlayerChoice = (e) => {
+    const gameGrid = document.querySelectorAll(".field");
     currentLayout = gameBoard.getLayout(); // get current gameboard layout
     let { index1, index2, target } = getPlayerChoice(e); // Get players choice
     // Has the square already been taken?
     if (currentLayout[index1][index2] !== 0) {
       return;
     } else {
-      // If not add value 1 or -1 to the layout array...
+      // If not ...
       if (playerManagement.currentPlayerIsX() === true) {
         playerManagement.setCurrentPlayer();
+        // add player "X" points to the layout array...
         currentLayout[index1].splice(index2, 1, 1);
-        // and set content of the clicked square to "X"...
+        // and set content of the clicked square to "X"
         target.textContent = "x";
         target.classList.add("taken");
+        // OR
       } else {
         playerManagement.setCurrentPlayer();
+        // add player "O" points to the layout array...
         currentLayout[index1].splice(index2, 1, -1);
-        // or to "O"
+        // and set content of the clicked square to "O"
         target.textContent = "o";
         target.classList.add("taken");
       }
     }
 
-    takenSquares += 1;
-
     // Check if there is already a winner...
     calculateResult.calcPoints();
+
     // or stop the game when all squares are taken
-    if (takenSquares === 9) {
-      calculateResult.calcPoints();
+    let allSquaresTaken = true;
+
+    for (elem of gameGrid) {
+      if (!elem.classList.contains("taken") === true) {
+        allSquaresTaken = false;
+        break;
+      }
+    }
+
+    if (allSquaresTaken) {
+      calculateResult.calcPoints(allSquaresTaken);
     }
   };
 
@@ -324,9 +354,8 @@ const calculateResult = (function () {
 
   // Function to calculate a winner (3 in a line) or a draw
   let winner = null;
-  let iteration = 0;
 
-  const calcPoints = () => {
+  const calcPoints = (allSquaresTaken) => {
     let lineSum = getLineSum();
     let result = "";
 
@@ -344,9 +373,7 @@ const calculateResult = (function () {
       }
     }
 
-    iteration += 1;
-
-    if (iteration === 9 && !winner) {
+    if (allSquaresTaken && !winner) {
       result = "Draw";
       showEndresult.updateResultDisplay(result);
     }
@@ -474,3 +501,4 @@ const showEndresult = (function () {
 })();
 
 playerManagement.getPlayerName();
+playerManagement.startGamewithDefaultNames();

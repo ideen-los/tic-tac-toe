@@ -102,9 +102,10 @@ input:-webkit-autofill:focus {
 
 .btn {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  padding: 8px 46px 8px 6px;
+  gap: 21px;
+  padding: 8px 46px 8px 3px;
   font-size: 19px;
   text-transform: uppercase;
   font-weight: 600;
@@ -118,29 +119,35 @@ input:-webkit-autofill:focus {
     rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
-.btn span {
+.btn span,
+.controls .btn span {
   padding: 5px;
   font-size: 29px;
   color: #e7e7e7;
-  background-color: #c27fab;
+  background-color: #c2529b;
   border-radius: 50%;
   margin-bottom: 2px;
 }
 
+.controls .btn span {
+  padding: 9px;
+}
+
 .btn-next-round {
+  margin-bottom: -124px;
   padding: 28px 42px;
   font-size: 23px;
   background-color: #c2529b;
   color: #eee;
 }
 
+.btn-start-game {
+  margin-top: 12px;
+}
+
 .btn:hover {
   color: #222;
   background-color: ivory;
-}
-
-.btn:hover span {
-  background-color: #c2529b;
 }
 
 .btn:active {
@@ -151,6 +158,24 @@ input:-webkit-autofill:focus {
 .btn:active span {
   background-color: #111;
   color: #eee;
+}
+
+.btn-player-name {
+  background-color: #c2529b;
+  color: #eee;
+}
+
+.btn-player-name:hover {
+  background-color: #d565ae;
+  color: #eee;
+}
+
+.btn-player-name span {
+  background-color: #d885ba;
+}
+
+.btn-player-name:active span {
+  background-color: #d885ba;
 }
 
 .player-display {
@@ -168,6 +193,16 @@ input:-webkit-autofill:focus {
   display: flex;
   justify-content: start;
   align-items: center;
+}
+
+.wins {
+  transition: transform 0.2s ease-in;
+  transform: scale(1);
+  z-index: 3;
+}
+
+.wins.scale {
+  transform: scale(60);
 }
 
 .player-display-player1 div > span {
@@ -206,6 +241,7 @@ input:-webkit-autofill:focus {
   align-items: center;
   width: 100%;
   height: 100%;
+  padding-bottom: 124px;
   font-size: 47px;
   font-weight: 500;
   line-height: 1.3;
